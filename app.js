@@ -1,10 +1,15 @@
 import express from "express";
+import morgan from "morgan";
 
 const app = express();
 
 app.disable('x-powered-by')
 
 const PORT = 3001;
+
+morgan.token('body', (req) => JSON.stringify(req.body))
+
+app.use(morgan(':method :url :status :res[content-length] -response-time ms :body'))
 
 let persons = [
     {

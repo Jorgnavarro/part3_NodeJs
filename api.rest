@@ -12,8 +12,8 @@ POST http://localhost:3001/api/persons
 Content-Type: application/json
 
 {
-    "name": "",
-    "number": ""
+    "name": "Luis Navarro",
+    "number": "3165023366"
 }
 
 ###delete a contact
