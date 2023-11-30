@@ -1,15 +1,16 @@
 import express from "express";
 import morgan from "morgan";
+import cors from "cors";
 
 const app = express();
 
 app.disable('x-powered-by')
 
-const PORT = 3001;
+app.use(cors())
 
 morgan.token('body', (req) => JSON.stringify(req.body))
 
-app.use(morgan(':method :url :status :res[content-length] -response-time ms :body'))
+app.use(morgan(':method :url :status :res[content-length] :response-time ms :body'))
 
 let persons = [
     {
@@ -112,5 +113,8 @@ app.delete('/api/persons/:id', (req, res) => {
     res.status(204).end()
 })
 
-app.listen(PORT);
+const PORT = process.env.PORT || 3001;
+
+app.listen(PORT)
+
 console.log(`Server listening on port: http://localhost:${PORT}`);
