@@ -1,8 +1,11 @@
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
+import Person  from "./models/person.js"
+
 
 const app = express();
+
 
 app.disable('x-powered-by')
 
@@ -60,54 +63,67 @@ app.get('/info', (req, res) => {
 })
 // obtain the list of the persons
 app.get('/api/persons', (req, res) => {
-    res.json(persons);
+    Person.find({}).then(personToSearch => {
+        res.json(personToSearch);
+    })
 })
 // obtain an especific information about the contact with id
 app.get('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    const person = persons.find(p => p.id === id);
-    if(person){
-        res.json(person)
-    }else{
-        res.status(404).send(`<h1>The person with id ${id}, doesn't exist in our database</h1>`);
-    }
+    // const id = Number(req.params.id)
+    // const person = persons.find(p => p.id === id);
+    // if(person){
+    //     res.json(person)
+    // }else{
+    //     res.status(404).send(`<h1>The person with id ${id}, doesn't exist in our database</h1>`);
+    // }
+    Person.findById(req.params.id)
+        .then(person => {
+            res.json(person)
+        })
+        .catch(err => {
+            console.log(`The person with id: ${req.params.id} does not exist.`)
+        })
 
 })
 
 app.use(express.json())
 
 //function generate id
-const generateId = () => {
-    const lastNumberID = 10000
-    return Math.floor(Math.random() * (lastNumberID - 5 + 1) + 5);
-}
+// const generateId = () => {
+//     const lastNumberID = 10000
+//     return Math.floor(Math.random() * (lastNumberID - 5 + 1) + 5);
+// }
 
 
 //create a new contact
 app.post('/api/persons', (req, res) => {
     const body = req.body
-
-    if(!body.name || !body.number){
+    if(body.name === undefined || body.number === undefined){
         return res.status(400).json({
             error: "content missing"
         })
     }
 
-    const findEqualName = persons.find(p => p.name === body.name)
-    if(findEqualName){
-        return res.status(400).json({
-            error: "name must be unique"
-        })
-    }
+    // const findEqualName = Person.find({name:`${body.name}`})
+    //     .then(result => result)
 
-    const person = {
+    // if(findEqualName){
+    //     return res.status(400).json({
+    //         error: "name must be unique"
+    //     })
+    // }
+
+    const person = new Person({
         name: body.name,
         number: body.number,
-        id: generateId()
-    }
-    persons = persons.concat(person);
-    res.json(person);
+    })
+
+    person.save().then(savedPerson => {
+        console.log(savedPerson)
+        res.json(savedPerson);
+    })
 })
+
 // delete a contact
 app.delete('/api/persons/:id', (req, res) => {
     const id = Number(req.params.id);
