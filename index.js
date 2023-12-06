@@ -27,12 +27,10 @@ app.get('/', (req, res) => {
 app.get('/info', (req, res) => {
     const date = new Date()
     Person.find({}).then(personToSearch => {
-        const arr = [...personToSearch];
-        return arr.length
-    }).then(totalContacts => {
+        const totalPersons = [...personToSearch];
         res.send(`
         <div>
-        <h1>Phonebook has info for ${totalContacts} people</h1>
+        <h1>Phonebook has info for ${totalPersons.length} people</h1>
         <p>${date}<p>
         </div>
         `)
