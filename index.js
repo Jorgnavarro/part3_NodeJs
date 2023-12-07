@@ -72,7 +72,7 @@ app.use(express.json())
 
 
 //create a new contact
-app.post('/api/persons', (req, res) => {
+app.post('/api/persons', (req, res, next) => {
     const body = req.body
     if(!body.name||!body.number){
         return res.status(400).json({
@@ -94,10 +94,11 @@ app.post('/api/persons', (req, res) => {
         number: body.number,
     })
 
-    person.save().then(savedPerson => {
-        console.log(savedPerson)
-        res.json(savedPerson);
-    })
+    person.save().then(savedPerson => savedPerson.toJSON())
+        .then(savedAndFormattedPerson => {
+            res.json(savedAndFormattedPerson)
+        })
+        .catch(err => next(err))
 })
 
 // Update a contact
@@ -127,11 +128,20 @@ app.delete('/api/persons/:id', (req, res, next) => {
         .catch(err => next(err))
 })
 
+const unknowEndpoint = (req, res) => {
+    res.status(404).send({ error: 'unknow endpoint' })
+}
+
+app.use(unknowEndpoint);
+
 const errorHandler = (err, req, res, next) => {
     console.log(err.message)
     if(err.name === "CastError"){
         return res.status(400).send({error: 'malformatted id'})
+    }else if(err.name === "ValidationError"){
+        return res.status(400).json({error: err.message})
     }
+    next(err)
 }
 
 app.use(errorHandler)
